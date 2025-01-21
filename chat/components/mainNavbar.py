@@ -37,9 +37,14 @@ def navbar_log_out(text: str, url: str, variant: str) -> rx.Component:
 
 def user_info():
     user_info_obj = SessionState.authenticated_user_info
+    username_via_user_obj = rx.cond(
+        SessionState.authenticated_username,
+        SessionState.authenticated_username, 
+        "Account"
+    )
     return rx.cond(
         user_info_obj,
-        rx.text(f"{user_info_obj.username}", size="4", weight="bold", color="blue.500"),
+        rx.text(f"{username_via_user_obj}", size="4", weight="bold", color="blue.500"),
     )
 
 def mainNavbar() -> rx.Component:

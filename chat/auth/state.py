@@ -8,6 +8,12 @@ import sqlmodel
 
 class SessionState(reflex_local_auth.LocalAuthState):
     @rx.var(cache=True)
+    def authenticated_username(self) -> str | None:
+        if self.authenticated_user.id < 0:
+            return None
+        return self.authenticated_user.username
+
+    @rx.var(cache=True)
     def authenticated_user_info(self) -> UserInfo | None:
         if self.authenticated_user.id < 0:
             return None
@@ -67,7 +73,6 @@ class MyRegisterState(reflex_local_auth.RegistrationState):
                     UserInfo(
                         email=form_data["email"],
                         user_id=self.new_user_id,
-                        username=form_data["username"],
                     )
                 )
                 session.commit()

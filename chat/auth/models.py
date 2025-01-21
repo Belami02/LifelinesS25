@@ -3,7 +3,7 @@ from datetime import datetime
 from reflex_local_auth.user import LocalUser
 
 import sqlalchemy
-from sqlmodel import Field
+from sqlmodel import Field, Relationship
 
 from datetime import datetime, timezone
 
@@ -13,7 +13,7 @@ def my_time() -> datetime:
 class UserInfo(rx.Model, table=True):
     email: str
     user_id: int = Field(foreign_key='localuser.id')
-    username: str
+    user: LocalUser | None = Relationship() 
     created_at: datetime = Field(
         default_factory=my_time,
         sa_type=sqlalchemy.DateTime(timezone=True),
