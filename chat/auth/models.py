@@ -13,6 +13,7 @@ def my_time() -> datetime:
 class UserInfo(rx.Model, table=True):
     email: str
     user_id: int = Field(foreign_key='localuser.id')
+    username: str
     created_at: datetime = Field(
         default_factory=my_time,
         sa_type=sqlalchemy.DateTime(timezone=True),

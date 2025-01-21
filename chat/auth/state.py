@@ -23,6 +23,15 @@ class SessionState(reflex_local_auth.LocalAuthState):
             return reflex_local_auth.LoginState.redir
         print(self.authenticated_user_info)
 
+    def perform_logout(self):
+        self.do_logout()
+        return rx.redirect("/login")
+    
+    @property
+    def username(self) -> Optional[str]:
+        user_info = self.authenticated_user.username
+        return user_info if user_info else None
+        
 class MyRegisterState(reflex_local_auth.RegistrationState):
     def handle_registration(
         self, form_data
@@ -54,6 +63,7 @@ class MyRegisterState(reflex_local_auth.RegistrationState):
                     UserInfo(
                         email=form_data["email"],
                         user_id=self.new_user_id,
+                        username=form_data["username"],
                     )
                 )
                 session.commit()

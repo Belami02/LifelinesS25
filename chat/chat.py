@@ -6,6 +6,7 @@ import reflex_local_auth # s00n I'll add this
 from chat.auth.models import UserInfo
 
 from chat.components import chat, navbar
+from chat.components.mainNavbar import mainNavbar
 from chat.pages.register import RegistrationPage
 from chat.pages.login import LoginPage
 from chat.auth.state import SessionState
@@ -13,6 +14,7 @@ from chat.auth.state import SessionState
 def index() -> rx.Component:
     """The main app."""
     return rc.vstack(
+        mainNavbar(),
         navbar(),
         chat.chat(),
         chat.action_bar(),

@@ -1,6 +1,7 @@
 import reflex as rx
 from chat.components.mainNavbar import mainNavbar
 from reflex_local_auth.pages.login import LoginState, login_error
+from chat.auth.state import SessionState
 
 def login() -> rx.Component:
     return rx.form(
@@ -88,12 +89,15 @@ def LoginPage():
     return rx.vstack(
         mainNavbar(),
         rx.cond(
-            LoginState.is_hydrated,
-            rx.card(
-                login(),
-                size="4",
-                max_width="28em",
-                width="100%",
+            ~SessionState.is_authenticated,
+            rx.cond(
+                LoginState.is_hydrated,
+                rx.card(
+                    login(),
+                    size="4",
+                    max_width="28em",
+                    width="100%",
+                ),
             ),
         ),
         #flex="1",  

@@ -1,7 +1,7 @@
 import reflex as rx
 import reflex as rx
 from reflex.style import set_color_mode, color_mode
-
+from chat.auth.state import SessionState
 
 def dark_mode_toggle() -> rx.Component:
     return rx.segmented_control.root(
@@ -29,6 +29,12 @@ def navbar_button(text: str, url: str, variant: str) -> rx.Component:
         rx.button(text, size="3", variant=variant, width="auto"), href = url
     )
 
+def navbar_log_out(text: str, url: str, variant: str) -> rx.Component:
+    return rx.link(
+        rx.button(text, size="3", on_click=SessionState.perform_logout,
+                variant=variant, width="auto"), href = url
+    )
+
 def mainNavbar() -> rx.Component:
     return rx.box(
         rx.desktop_only(
@@ -48,10 +54,24 @@ def mainNavbar() -> rx.Component:
                     spacing="5",
                 ),
                 rx.hstack(
+                    rx.cond(
+                        SessionState.is_authenticated,
+                        rx.text(str(SessionState.username), size="4", weight="bold", color="blue.500"),
+                    ),
                     dark_mode_toggle(),
                     # rx.button("Sign Up", size="3", variant="outline", width="auto", on_click=rx.redirect('/register')),
-                    navbar_button("Sign Up", "/register", variant="outline"),
-                    navbar_button("Log In", "/login", variant="solid"),
+                    rx.cond(
+                        ~SessionState.is_authenticated,
+                        navbar_button("Sign Up", "/register", variant="outline"),
+                    ),
+                    rx.cond(
+                        ~SessionState.is_authenticated,
+                        navbar_button("Log In", "/login", variant="solid"),
+                    ),
+                    rx.cond(
+                        SessionState.is_authenticated,
+                        navbar_log_out("Log Out", "/", variant="solid"),
+                    ),
                     # rx.button(
                     #     "Sign Up",
                     #     size="3",

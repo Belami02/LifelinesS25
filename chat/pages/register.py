@@ -1,6 +1,6 @@
 import reflex as rx
 from chat.components.mainNavbar import mainNavbar
-from chat.auth.state import MyRegisterState
+from chat.auth.state import MyRegisterState, SessionState
 from chat.auth.forms import register_error
 from reflex_local_auth.pages.registration import RegistrationState
 
@@ -126,15 +126,18 @@ def RegistrationPage():
         mainNavbar(),
         # signup(),
         rx.cond(
-            RegistrationState.success,
-            rx.center(
-                rx.vstack("Registration successful!"),
-            ),
-            rx.card(
-                signup(),
-                size="4",
-                max_width="28em",
-                width="100%",
+            ~SessionState.is_authenticated,
+            rx.cond(
+                RegistrationState.success,
+                rx.center(
+                    rx.vstack("Registration successful!"),
+                ),
+                rx.card(
+                    signup(),
+                    size="4",
+                    max_width="28em",
+                    width="100%",
+                ),
             ),
         ),
         #flex="1",  
