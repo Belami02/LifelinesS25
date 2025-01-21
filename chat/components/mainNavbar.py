@@ -35,6 +35,13 @@ def navbar_log_out(text: str, url: str, variant: str) -> rx.Component:
                 variant=variant, width="auto"), href = url
     )
 
+def user_info():
+    user_info_obj = SessionState.authenticated_user_info
+    return rx.cond(
+        user_info_obj,
+        rx.text(f"{user_info_obj.username}", size="4", weight="bold", color="blue.500"),
+    )
+
 def mainNavbar() -> rx.Component:
     return rx.box(
         rx.desktop_only(
@@ -54,10 +61,7 @@ def mainNavbar() -> rx.Component:
                     spacing="5",
                 ),
                 rx.hstack(
-                    rx.cond(
-                        SessionState.is_authenticated,
-                        rx.text(str(SessionState.username), size="4", weight="bold", color="blue.500"),
-                    ),
+                    user_info(),
                     dark_mode_toggle(),
                     # rx.button("Sign Up", size="3", variant="outline", width="auto", on_click=rx.redirect('/register')),
                     rx.cond(
