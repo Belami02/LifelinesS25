@@ -10,6 +10,7 @@ from chat.components.mainNavbar import mainNavbar
 from chat.pages.register import RegistrationPage
 from chat.pages.login import LoginPage
 from chat.auth.state import SessionState
+from chat.pages.map import MapPage
 
 def index() -> rx.Component:
     """The main app."""
@@ -40,3 +41,4 @@ app.add_page(index)
 app.add_page(about, route="/about", title = "About", on_load=SessionState.on_load)
 app.add_page(RegistrationPage, route="/register", title="Sign Up")  
 app.add_page(LoginPage, route="/login", title="Sign In")  
+app.add_page(MapPage, route="/map", title="map")

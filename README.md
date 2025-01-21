@@ -7,7 +7,7 @@ Contains team's GrindMinds submission for Lifelines hackathon at CMUQ in Spring 
 git clone https://github.com/Mohamed-Waiel-Shikfa/LifelinesS25.git
 cd LifelinesS25
 pip install -r requirements.txt
-refelx init
+reflex init
 reflex run
 ```
 
