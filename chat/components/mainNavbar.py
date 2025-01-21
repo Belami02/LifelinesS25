@@ -1,4 +1,23 @@
 import reflex as rx
+import reflex as rx
+from reflex.style import set_color_mode, color_mode
+
+
+def dark_mode_toggle() -> rx.Component:
+    return rx.segmented_control.root(
+        rx.segmented_control.item(
+            rx.icon(tag="sun", size=20),
+            value="light",
+        ),
+        rx.segmented_control.item(
+            rx.icon(tag="moon", size=20),
+            value="dark",
+        ),
+        on_change=set_color_mode,
+        variant="classic",
+        radius="large",
+        value=color_mode,
+    )
 
 def navbar_link(text: str, url: str) -> rx.Component:
     return rx.link(
@@ -14,17 +33,14 @@ def mainNavbar() -> rx.Component:
     return rx.box(
         rx.desktop_only(
             rx.hstack(
-                rx.hstack(
-                    # rx.image(
-                    #     src="/logo.jpg",
-                    #     width="2.25em",
-                    #     height="auto",
-                    #     border_radius="25%",
-                    # ),
-                    rx.heading(
-                        "Welcome!", size="7", weight="bold"
+                rx.link(
+                    rx.image(
+                        src="/LogoReconnect.png",
+                        width="13em",
+                        height="auto",
+                        border_radius="25%",
                     ),
-                    align_items="center",
+                    href="/",  
                 ),
                 rx.hstack(
                     navbar_link("Home", "/"),
@@ -32,6 +48,8 @@ def mainNavbar() -> rx.Component:
                     spacing="5",
                 ),
                 rx.hstack(
+                    dark_mode_toggle(),
+                    # rx.button("Sign Up", size="3", variant="outline", width="auto", on_click=rx.redirect('/register')),
                     navbar_button("Sign Up", "/register", variant="outline"),
                     navbar_button("Log In", "/login", variant="solid"),
                     # rx.button(
@@ -42,6 +60,7 @@ def mainNavbar() -> rx.Component:
                     # rx.button("Log In", size="3"),
                     spacing="4",
                     justify="end",
+                    align_items="center",
                 ),
                 justify="between",
                 align_items="center",
@@ -50,29 +69,33 @@ def mainNavbar() -> rx.Component:
         rx.mobile_and_tablet(
             rx.hstack(
                 rx.hstack(
-                    # rx.image(
-                    #     src="/logo.jpg",
-                    #     width="2em",
-                    #     height="auto",
-                    #     border_radius="25%",
-                    # ),
-                    rx.heading(
-                        "Welcome!", size="6", weight="bold"
+                    rx.link(
+                        rx.image(
+                            src="/LogoReconnect.png",
+                            width="13em",
+                            height="auto",
+                            border_radius="25%",
+                        ),
+                        href="/",  
                     ),
                     align_items="center",
                 ),
-                rx.menu.root(
-                    rx.menu.trigger(
-                        rx.icon("menu", size=30)
+                rx.hstack(
+                    dark_mode_toggle(),
+                    rx.menu.root(
+                        rx.menu.trigger(
+                            rx.icon("menu", size=30)
+                        ),
+                        rx.menu.content(
+                            rx.menu.item("Home"),
+                            rx.menu.item("About"),
+                            rx.menu.separator(),
+                            rx.menu.item("Log in"),
+                            rx.menu.item("Sign up"),
+                        ),
+                        justify="end",
                     ),
-                    rx.menu.content(
-                        rx.menu.item("Home"),
-                        rx.menu.item("About"),
-                        rx.menu.separator(),
-                        rx.menu.item("Log in"),
-                        rx.menu.item("Sign up"),
-                    ),
-                    justify="end",
+                    justify="between",
                 ),
                 justify="between",
                 align_items="center",
