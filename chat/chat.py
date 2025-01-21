@@ -6,6 +6,7 @@ import reflex_chakra as rc
 from chat.components import chat, navbar
 from chat.pages.register import RegistrationPage
 from chat.pages.login import LoginPage
+from chat.pages.map import MapPage
 
 def index() -> rx.Component:
     """The main app."""
@@ -33,5 +34,6 @@ app = rx.App(
 )
 app.add_page(index)
 app.add_page(about)
-app.add_page(RegistrationPage, route="/register", title="Sign Up")  
-app.add_page(LoginPage, route="/login", title="Sign In")  
+app.add_page(RegistrationPage, route="/register", title="Sign Up")
+app.add_page(LoginPage, route="/login", title="Sign In")
+app.add_page(MapPage, route="/map", title="map")
