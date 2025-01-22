@@ -1,3 +1,7 @@
 reflex>=0.4.7
 openai>=1.14.0
 reflex-chakra>=0.6.0
+alembic>=1.14.0
+reflex-local-auth>=0.2.2
+SQLAlchemy>=2.0.37
+sqlmodel>=0.0.22

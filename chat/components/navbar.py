@@ -81,15 +81,6 @@ def navbar():
     return rx.box(
         rx.hstack(
             rx.hstack(
-                rx.avatar(fallback="RC", variant="solid"),
-                rx.heading("Reflex Chat"),
-                rx.desktop_only(
-                    rx.badge(
-                    State.current_chat,
-                    rx.tooltip(rx.icon("info", size=14), content="The current selected chat."),
-                    variant="soft"
-                    )
-                ),
                 align_items="center",
             ),
             rx.hstack(

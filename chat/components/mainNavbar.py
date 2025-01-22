@@ -61,7 +61,13 @@ def mainNavbar() -> rx.Component:
                     href="/",  
                 ),
                 rx.hstack(
-                    navbar_link("Home", "/"),
+                    rx.cond(
+                        SessionState.is_authenticated,
+                        navbar_link("Add Post", "/post/add"),
+                    ),
+                    navbar_link("Posts", "/post"),
+                    navbar_link("Map", "/map"),
+                    navbar_link("Chat", "/chat"),
                     navbar_link("About", "/about"),
                     spacing="5",
                 ),
@@ -116,11 +122,13 @@ def mainNavbar() -> rx.Component:
                             rx.icon("menu", size=30)
                         ),
                         rx.menu.content(
-                            rx.menu.item("Home"),
-                            rx.menu.item("About"),
+                            rx.menu.item("Posts", on_click=rx.redirect("/post")),
+                            rx.menu.item("About", on_click=rx.redirect("/about")),
+                            rx.menu.item("Map", on_click=rx.redirect("/map")),
+                            rx.menu.item("Chat", on_click=rx.redirect("/chat")),
                             rx.menu.separator(),
-                            rx.menu.item("Log in"),
-                            rx.menu.item("Sign up"),
+                            rx.menu.item("Log in", on_click=rx.redirect("/login")),
+                            rx.menu.item("Register", on_click=rx.redirect("/register")),
                         ),
                         justify="end",
                     ),
