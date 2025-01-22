@@ -118,6 +118,10 @@ We have achieved the following milestones in our project:
 - `/post/[post_id]`: Detailed view of a specific post
 - `/post/[post_id]/edit`: Page to edit a specific post
 
+## Demo (MVP)
+
+You can check the 4-minute demo of the current functionality at the following URL: [Watch the demo](https://www.youtube.com/watch?v=yAy-UUYEOLA)
+
 ## Credit
 
 This project would not have been possible without the incredible support and resources provided by the Reflex team. Their comprehensive documentation and ready-made component templates were invaluable. Additionally, special thanks to `masenf` for creating the `reflex-local-auth` library, which greatly simplified the authentication process.
