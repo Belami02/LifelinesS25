@@ -86,6 +86,7 @@ We are not just showcasing lost items, we are helping people connect and come to
 10. Heatmaps for activity tracking
 11. Notification system for matching items
 
-## License:
-This project is under MIT license.
+## License
+
+This project is licensed under the MIT License. For more details, see the [LICENSE](https://github.com/Mohamed-Waiel-Shikfa/LifelinesS25/blob/main/LICENSE) file.
 
