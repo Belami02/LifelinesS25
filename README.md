@@ -85,3 +85,7 @@ We are not just showcasing lost items, we are helping people connect and come to
 9. AI systems for similarity search
 10. Heatmaps for activity tracking
 11. Notification system for matching items
+
+## License:
+This project is under MIT license.
+
