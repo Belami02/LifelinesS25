@@ -85,3 +85,40 @@ We are not just showcasing lost items, we are helping people connect and come to
 9. AI systems for similarity search
 10. Heatmaps for activity tracking
 11. Notification system for matching items
+
+# Tech Side (MVP)
+
+We have achieved the following milestones in our project:
+
+- Created a user and posts database to store:
+  - Username
+  - Email
+  - Title
+  - Description
+  - Creation time of listings
+  - Information about the people creating these listings
+- Developed fully functional login and registration pages with authentication.
+- Implemented fully functional features for adding, editing, and saving posts.
+- Enabled viewing of all posts.
+- Created a map page that shows example pins and data.
+- Planned to create communities directly linked to posts, allowing everyone to join each community and use tools to help find lost persons, pets, or items.
+- Drafted a private chat interface showcasing chat with AI integration (currently not fully functional).
+- Ensured the platform is mobile responsive.
+
+## Existing Pages:
+
+- `/`: Home page
+- `/post`: List of all posts
+- `/map`: Map page showing example pins and data
+- `/about`: About page with information about the platform and future goals
+- `/login`: Login page for user authentication
+- `/chat`: Chat interface (currently not fully functional)
+- `/register`: Registration page for new users
+- `/post/add`: Page to add a new post
+- `/post/[post_id]`: Detailed view of a specific post
+- `/post/[post_id]/edit`: Page to edit a specific post
+
+## Credit
+
+This project would not have been possible without the incredible support and resources provided by the Reflex team. Their comprehensive documentation and ready-made component templates were invaluable. Additionally, special thanks to `masenf` for creating the `reflex-local-auth` library, which greatly simplified the authentication process.
+
