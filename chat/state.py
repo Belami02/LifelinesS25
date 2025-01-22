@@ -4,8 +4,8 @@ from openai import OpenAI
 
 
 # Checking if the API key is set properly
-# if not os.getenv("OPENAI_API_KEY"):
-#     raise Exception("Please set OPENAI_API_KEY environment variable.")
+if not os.getenv("OPENAI_API_KEY"):
+    raise Exception("Please set OPENAI_API_KEY environment variable.")
 
 
 class QA(rx.Base):
