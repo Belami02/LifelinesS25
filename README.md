@@ -122,3 +122,7 @@ We have achieved the following milestones in our project:
 
 This project would not have been possible without the incredible support and resources provided by the Reflex team. Their comprehensive documentation and ready-made component templates were invaluable. Additionally, special thanks to `masenf` for creating the `reflex-local-auth` library, which greatly simplified the authentication process.
 
+## License
+
+This project is licensed under the MIT License. For more details, see the [LICENSE](https://github.com/Mohamed-Waiel-Shikfa/LifelinesS25/blob/main/LICENSE) file.
+
