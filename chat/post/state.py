@@ -28,7 +28,18 @@ class PostState(SessionState):
         if not self.post:
             return "/post"
         return f"/post/{self.post.id}/edit"
-
+    
+    @rx.var
+    def is_member(self) -> bool:
+        """Check if the current user is a member of the post."""
+        if self.post and self.my_userinfo_id:
+            member_ids = [member.user_id for member in self.post.members]
+            print(f"Member IDs: {member_ids}")
+            print(f"Userinfo ID: {self.my_userinfo_id}")
+            print(any(member.user_id == self.my_userinfo_id for member in self.post.members))
+            return any(member.user_id == self.my_userinfo_id for member in self.post.members)
+        return False
+    
     def load_posts(self, *args, **kwargs):
         with rx.session() as session:
             result = session.exec(
@@ -61,6 +72,7 @@ class PostState(SessionState):
             session.refresh(post) # post.id
             print("added", post)
             self.post = post
+            self.join_post(post.id)
 
     def to_post(self, edit_page=False):
         if not self.post:
@@ -85,9 +97,14 @@ class PostState(SessionState):
                 self.post = None
                 return
             sql_statement = select(PostModel).options(
-                sqlalchemy.orm.joinedload(PostModel.userinfo).joinedload(UserInfo.user)
+                sqlalchemy.orm.joinedload(PostModel.userinfo).joinedload(UserInfo.user),
+                sqlalchemy.orm.joinedload(PostModel.members)
             ).where(lookups)
-            result = session.exec(sql_statement).one_or_none()
+            result = session.exec(sql_statement).unique().one_or_none()
+            if result:
+                print("Members:")
+                for member in result.members:
+                    print(f"Member ID: {member.id}, Username: {member.user.username}, Email: {member.email}")
             if result is None:
                 self.post_content = ""
                 self.post = None
@@ -120,58 +137,6 @@ class PostState(SessionState):
             session.add(post)
             session.commit()
             session.refresh(post)
-            self.post = post  
-
-    def join_post(self, post_id: int):
-        with rx.session() as session:
-            post = session.exec(
-                select(PostModel).where(
-                    PostModel.id == post_id
-                )
-            ).one_or_none()
-            if post is None:
-                return
-            userinfo = session.exec(
-                select(UserInfo).where(
-                    UserInfo.user_id == self.my_userinfo_id
-                )
-            ).one_or_none()
-            if userinfo is None:
-                return
-            if userinfo not in post.members:
-                post.members.append(userinfo)
-                userinfo.joined_posts.append(post)
-                session.add(post)
-                session.add(userinfo)
-                session.commit()
-                session.refresh(post)
-                session.refresh(userinfo)
-            self.post = post
-
-    def leave_post(self, post_id: int):
-        with rx.session() as session:
-            post = session.exec(
-                select(PostModel).where(
-                    PostModel.id == post_id
-                )
-            ).one_or_none()
-            if post is None:
-                return
-            userinfo = session.exec(
-                select(UserInfo).where(
-                    UserInfo.user_id == self.my_userinfo_id
-                )
-            ).one_or_none()
-            if userinfo is None:
-                return
-            if userinfo in post.members:
-                post.members.remove(userinfo)
-                userinfo.joined_posts.remove(post)
-                session.add(post)
-                session.add(userinfo)
-                session.commit()
-                session.refresh(post)
-                session.refresh(userinfo)
             self.post = post
 
 class addPostFormState(PostState):

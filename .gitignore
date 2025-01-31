@@ -22,4 +22,4 @@ venv/
 alembic/
 alembic.ini
 # Ignore .env file
-chat/.env
+.env

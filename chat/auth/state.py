@@ -1,7 +1,9 @@
 import reflex as rx
 import reflex_local_auth
 from .models import UserInfo
-
+from chat.auth.models import PostModel, UserInfo
+import sqlalchemy
+from sqlmodel import select
 from typing import Optional
 import sqlmodel
 import base64
@@ -88,6 +90,56 @@ class SessionState(reflex_local_auth.LocalAuthState):
                 print(f"Profile photo updated in DB")
             else:
                 print(f"No UserInfo found for user_id: {self.my_userinfo_id}")
+
+    def join_post(self, post_id: int):
+        with rx.session() as session:
+            post = session.exec(
+                select(PostModel).where(
+                    PostModel.id == post_id
+                )
+            ).one_or_none()
+            if post is None:
+                return
+            userinfo = session.exec(
+                select(UserInfo).where(
+                    UserInfo.user_id == self.authenticated_user.id
+                )
+            ).one_or_none()
+            if userinfo is None:
+                return
+            if userinfo not in post.members:
+                post.members.append(userinfo)
+                userinfo.joined_posts.append(post)
+                session.add(post)
+                session.add(userinfo)
+                session.commit()
+                session.refresh(post)
+                session.refresh(userinfo)
+
+    def leave_post(self, post_id: int):
+        with rx.session() as session:
+            post = session.exec(
+                select(PostModel).where(
+                    PostModel.id == post_id
+                )
+            ).one_or_none()
+            if post is None:
+                return
+            userinfo = session.exec(
+                select(UserInfo).where(
+                    UserInfo.user_id == self.my_userinfo_id
+                )
+            ).one_or_none()
+            if userinfo is None:
+                return
+            if userinfo in post.members:
+                post.members.remove(userinfo)
+                userinfo.joined_posts.remove(post)
+                session.add(post)
+                session.add(userinfo)
+                session.commit()
+                session.refresh(post)
+                session.refresh(userinfo)
         
 class MyRegisterState(reflex_local_auth.RegistrationState):
     def handle_registration(

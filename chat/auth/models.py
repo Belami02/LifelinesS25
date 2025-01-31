@@ -78,10 +78,3 @@ class PostModel(rx.Model, table=True):
         sa_type=sqlalchemy.DateTime(timezone=True),
         nullable=True
     )
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        # Add the post creator as a member of the post
-        if self.userinfo:
-            self.members.append(self.userinfo)

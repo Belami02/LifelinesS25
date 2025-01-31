@@ -35,7 +35,6 @@ def profile_photo_card():
                 width="200px",
                 height="auto",
                 border_radius="full",
-                margin_bottom="4"
             ),
             rx.text(
                 "Profile Photo",
@@ -43,7 +42,8 @@ def profile_photo_card():
                     light=colors["text"]["light"],
                     dark=colors["text"]["dark"]
                 ),
-                text_align="center"
+                text_align="center",
+                margin_bottom="0.5em"
             ),
             padding="8",
             box_shadow="lg",
@@ -72,6 +72,7 @@ def profile_photo_upload():
                 size="4",
                 text_align="center",
                 margin_bottom="4",
+                padding_top="1em",  # Add padding to the top
                 color=rx.color_mode_cond(
                     light=colors["text"]["light"],
                     dark=colors["text"]["dark"]
@@ -143,6 +144,7 @@ def profile_photo_upload():
                         "color": "white"
                     }
                 ),
+                padding_bottom="1em",  # Add padding to the bottom
                 spacing="4"
             ),
             padding="8",
@@ -154,6 +156,8 @@ def profile_photo_upload():
             border_radius="md",
             max_width="600px",
             margin="auto",
+            align_items="center",
+            justify_content="center",
             border_color=rx.color_mode_cond(
                 light=colors["border"]["light"],
                 dark=colors["border"]["dark"]
