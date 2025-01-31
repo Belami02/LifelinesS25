@@ -32,13 +32,25 @@ class PostState(SessionState):
     @rx.var
     def is_member(self) -> bool:
         """Check if the current user is a member of the post."""
-        if self.post and self.my_userinfo_id:
-            member_ids = [member.user_id for member in self.post.members]
-            print(f"Member IDs: {member_ids}")
-            print(f"Userinfo ID: {self.my_userinfo_id}")
-            print(any(member.user_id == self.my_userinfo_id for member in self.post.members))
-            return any(member.user_id == self.my_userinfo_id for member in self.post.members)
-        return False
+        try:
+            if self.post is None or self.my_user_id is None:
+                return False
+
+            with rx.session() as session:
+                post = session.exec(
+                    select(PostModel)
+                    .options(sqlalchemy.orm.joinedload(PostModel.members))
+                    .where(PostModel.id == self.post.id)
+                ).unique().one_or_none()
+                
+                if post is None or not post.members:
+                    return False
+                
+                member_ids = [member.user_id for member in post.members]
+                return self.my_user_id in member_ids
+        except Exception as e:
+            print(f"Error checking membership: {e}")
+            return False
     
     def load_posts(self, *args, **kwargs):
         with rx.session() as session:
@@ -59,20 +71,64 @@ class PostState(SessionState):
             ).all()
             self.posts = result
 
-    def add_post(self, form_data:dict):
+    def add_post(self, form_data: dict):
         with rx.session() as session:
-            if 'category' not in form_data:
-                form_data['category'] = '#default'  
-            if 'publish_date' not in form_data:
-                form_data['publish_date'] = datetime.now(timezone.utc)
-            post = PostModel(**form_data)
-            print("adding", post)
-            session.add(post)
-            session.commit()
-            session.refresh(post) # post.id
-            print("added", post)
-            self.post = post
-            self.join_post(post.id)
+            try:
+                if 'title' not in form_data or 'content' not in form_data:
+                    print("Missing required fields: 'title' or 'content'")
+                    return
+
+                if 'category' not in form_data:
+                    form_data['category'] = '#default'
+                if 'publish_date' not in form_data:
+                    form_data['publish_date'] = datetime.now(timezone.utc)
+
+                post_data = form_data.copy()
+                if 'members' in post_data:
+                    del post_data['members']
+                
+                post = PostModel(**post_data)
+                post.members = []  
+                
+                if self.my_userinfo_id is not None:
+                    post.userinfo_id = self.my_userinfo_id
+                
+                session.add(post)
+                session.commit()
+                session.refresh(post)
+                self.post = post
+                print("Added post:", post)
+                return post
+            except Exception as e:
+                print(f"Error adding post: {e}")
+                session.rollback()
+                return None
+
+    def delete_post(self, post_id: int):
+        """Dekete the post and all its associated data from the database."""
+        try:
+            with rx.session() as session:
+                post = session.exec(
+                    select(PostModel).where(
+                        PostModel.id == post_id
+                    )
+                ).one_or_none()
+                if post is None:
+                    print(f"Post {post_id} not found.")
+                    return rx.redirect("/post")
+                
+                # Remove all associations
+                for member in post.members:
+                    member.joined_posts = [p for p in member.joined_posts if p.id != post_id]
+                    session.add(member)
+                
+                session.delete(post)
+                session.commit()
+                print(f"Post {post_id} and all its associated data have been removed.")
+                return rx.redirect("/post")
+        except Exception as e:
+            print(f"Error removing post: {e}")
+            return rx.redirect("/post")
 
     def to_post(self, edit_page=False):
         if not self.post:
@@ -104,7 +160,7 @@ class PostState(SessionState):
             if result:
                 print("Members:")
                 for member in result.members:
-                    print(f"Member ID: {member.id}, Username: {member.user.username}, Email: {member.email}")
+                    print(f"Member ID: {member.user_id}, Username: {member.user.username}, Email: {member.email}")
             if result is None:
                 self.post_content = ""
                 self.post = None

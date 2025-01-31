@@ -140,15 +140,27 @@ def post_detail_page() -> rx.Component:
     is_owner = editFormState.is_owner
     is_member = PostState.is_member
     edit_link = rx.link("Edit", href=f"{PostState.post_edit_url}")
-    join_button = rx.button("Join", on_click=lambda: PostState.join_post(PostState.post.id))
+    delete_link = rx.link("Delete", on_click=lambda: PostState.delete_post(PostState.post.id), color_scheme="red")
+    join_button = rx.button("Join", on_click=lambda: PostState.join_post(PostState.post.id), color_scheme="green")
+    leave_button = rx.button("Leave", on_click=lambda: PostState.leave_post(PostState.post.id), color_scheme="red")
     edit_link_el = rx.cond(
         is_owner,
         edit_link,
         rx.fragment("")
     )
+    delete_link_el = rx.cond(
+        is_owner,
+        delete_link,
+        rx.fragment("")
+    )
     join_button_el = rx.cond(
-        ~is_owner & ~is_member,
+        ~is_member,
         join_button,
+        rx.fragment("")
+    )
+    leave_button_el = rx.cond(
+        is_member,
+        leave_button,
         rx.fragment("")
     )
     
@@ -156,8 +168,10 @@ def post_detail_page() -> rx.Component:
         rx.vstack(
             rx.hstack(
                 rx.heading(PostState.post.title, size="9"),
-                edit_link_el,
                 join_button_el,
+                leave_button_el,
+                edit_link_el,
+                delete_link_el,
                 align='end'
             ),
             rx.card(

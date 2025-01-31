@@ -92,22 +92,33 @@ class SessionState(reflex_local_auth.LocalAuthState):
                 print(f"No UserInfo found for user_id: {self.my_userinfo_id}")
 
     def join_post(self, post_id: int):
-        with rx.session() as session:
-            post = session.exec(
-                select(PostModel).where(
-                    PostModel.id == post_id
-                )
-            ).one_or_none()
-            if post is None:
-                return
-            userinfo = session.exec(
-                select(UserInfo).where(
-                    UserInfo.user_id == self.authenticated_user.id
-                )
-            ).one_or_none()
-            if userinfo is None:
-                return
-            if userinfo not in post.members:
+        """Add current user to post members."""
+        try:
+            with rx.session() as session:
+                post = session.exec(
+                    select(PostModel).where(
+                        PostModel.id == post_id
+                    )
+                ).one_or_none()
+                if post is None:
+                    return
+                userinfo = session.exec(
+                    select(UserInfo).where(
+                        UserInfo.user_id == self.my_user_id
+                    )
+                ).one_or_none()
+
+                if userinfo is None:
+                    print(f"User {self.my_user_id} is not in a database :/")
+                    return
+                
+                member_ids = [member.user_id for member in post.members]
+                print("Post members' user_ids (before join):", member_ids)
+
+                if self.my_user_id in member_ids:
+                    print(f"User {userinfo.user_id} is already a member of post {post.id}")
+                    return
+                
                 post.members.append(userinfo)
                 userinfo.joined_posts.append(post)
                 session.add(post)
@@ -116,30 +127,59 @@ class SessionState(reflex_local_auth.LocalAuthState):
                 session.refresh(post)
                 session.refresh(userinfo)
 
+                print(f"User {userinfo.user_id} is successfully joined the post {post.id}")
+
+                member_ids = [member.user_id for member in post.members]
+                print("Post members' user_ids (after join):", member_ids)
+
+                return rx.redirect(f"/post/{post_id}")
+        except Exception as e:
+            print(f"Error joining post: {e}")
+
     def leave_post(self, post_id: int):
-        with rx.session() as session:
-            post = session.exec(
-                select(PostModel).where(
-                    PostModel.id == post_id
-                )
-            ).one_or_none()
-            if post is None:
-                return
-            userinfo = session.exec(
-                select(UserInfo).where(
-                    UserInfo.user_id == self.my_userinfo_id
-                )
-            ).one_or_none()
-            if userinfo is None:
-                return
-            if userinfo in post.members:
-                post.members.remove(userinfo)
-                userinfo.joined_posts.remove(post)
+        """Remove current user from post members.""" 
+        try:
+            with rx.session() as session:
+                post = session.exec(
+                    select(PostModel).where(
+                        PostModel.id == post_id
+                    )
+                ).one_or_none()
+                if post is None:
+                    return
+                userinfo = session.exec(
+                    select(UserInfo).where(
+                        UserInfo.user_id == self.my_user_id
+                    )
+                ).one_or_none()
+                if userinfo is None:
+                    print(f"User {self.my_user_id} is not in a database :/")
+                    return
+                
+                member_ids = [member.user_id for member in post.members]
+                print("Post members' user_ids (before leave):", member_ids)
+
+                if self.my_user_id not in member_ids:
+                    print(f"User {userinfo.user_id} is already no a member of post {post.id}")
+                    return
+
+                # Remove the user from post.members
+                post.members = [member for member in post.members if member.user_id != self.my_user_id]
+                userinfo.joined_posts = [p for p in userinfo.joined_posts if p.id != post_id]
+
                 session.add(post)
                 session.add(userinfo)
                 session.commit()
                 session.refresh(post)
                 session.refresh(userinfo)
+
+                print(f"User {userinfo.user_id} has successfully left the post {post.id}")
+
+                member_ids = [member.user_id for member in post.members]
+                print("Post members' user_ids (after leave):", member_ids)
+                return rx.redirect("/post")
+        except Exception as e:
+            print(f"Error joining post: {e}")
         
 class MyRegisterState(reflex_local_auth.RegistrationState):
     def handle_registration(
