@@ -17,6 +17,7 @@ from chat.post.detail import post_detail_page
 from chat.post.edit import post_edit_page
 from chat.post.post import post_page
 from chat.post.state import PostState
+from chat.pages.settings import SettingsPage
 
 def ChatPage() -> rx.Component:
     """The main app."""
@@ -31,9 +32,6 @@ def ChatPage() -> rx.Component:
         align_items="stretch",
         spacing="0",
     )
-
-def about():
-    return rx.text("About Page")
 
 # Add state and page to the app.
 app = rx.App(
@@ -79,4 +77,11 @@ app.add_page(
     route="/post",
     on_load=PostState.load_all_posts,
     title="All Posts",
+)
+
+app.add_page(
+    SettingsPage,
+    route="/settings",
+    title="Settings",
+    on_load=SessionState.on_load
 )

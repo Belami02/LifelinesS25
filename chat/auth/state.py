@@ -5,6 +5,10 @@ from .models import UserInfo
 from typing import Optional
 import sqlmodel
 
+from fastapi import UploadFile
+import shutil
+import os
+
 
 class SessionState(reflex_local_auth.LocalAuthState):
     @rx.var(cache=True)
@@ -53,6 +57,30 @@ class SessionState(reflex_local_auth.LocalAuthState):
     def username(self) -> Optional[str]:
         user_info = self.authenticated_user.username
         return user_info if user_info else None
+    
+    async def handle_profile_photo_submit(self, files: list[rx.UploadFile]):
+        if not files:
+            return
+        file = files[0]
+        upload_data = await file.read()
+        upload_dir = rx.get_upload_dir()
+        file_path = upload_dir / file.filename
+        
+        with file_path.open("wb") as buffer:
+            buffer.write(upload_data)
+        
+        with rx.session() as session:
+            userinfo = session.exec(
+                sqlmodel.select(UserInfo).where(UserInfo.user_id == self.my_userinfo_id)
+            ).one_or_none()
+            if userinfo is None:
+                return
+            userinfo.profile_photo = file.filename
+            session.add(userinfo)
+            session.commit()
+            session.refresh(userinfo)
+            self.authenticated_user_info = userinfo
+            print(f"Profile photo updated: {userinfo.profile_photo}")
         
 class MyRegisterState(reflex_local_auth.RegistrationState):
     def handle_registration(
