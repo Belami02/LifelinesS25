@@ -23,7 +23,7 @@ class UserInfo(rx.Model, table=True):
     email: str
     user_id: int = Field(foreign_key='localuser.id')
     user: LocalUser | None = Relationship() 
-    profile_photo: Optional[str] = None
+    profile_photo: Optional[bytes] = Field(default=None)
     posts: List['PostModel'] = Relationship(
         back_populates="userinfo"
     )

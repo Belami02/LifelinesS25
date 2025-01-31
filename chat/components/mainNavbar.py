@@ -68,7 +68,14 @@ def user_info() -> rx.Component:
     )
     return rx.cond(
         user_info_obj,
-        rx.text(f"{username_via_user_obj}", size="4", weight="bold", color="blue.500"),
+        rx.text(
+            f"{username_via_user_obj}",
+            size="4",
+            weight="bold",
+            color="blue.500",
+            _hover={"color": "blue.700", "cursor": "pointer"},
+            on_click=rx.redirect("/settings")
+        )
     )
 
 def desktop_navbar() -> rx.Component:

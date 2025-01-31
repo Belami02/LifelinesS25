@@ -4,11 +4,7 @@ from .models import UserInfo
 
 from typing import Optional
 import sqlmodel
-
-from fastapi import UploadFile
-import shutil
-import os
-
+import base64
 
 class SessionState(reflex_local_auth.LocalAuthState):
     @rx.var(cache=True)
@@ -41,13 +37,24 @@ class SessionState(reflex_local_auth.LocalAuthState):
             ).one_or_none()
             if result is None:
                 return None
-            print(result)
+            # print(result)
             return result
         
+    @rx.var
+    def profile_photo_base64(self) -> str:
+        """Convert binary profile photo to a base64 string for display."""
+        with rx.session() as session:
+            user_info = session.exec(
+                sqlmodel.select(UserInfo).where(UserInfo.user_id == self.authenticated_user.id)
+            ).one_or_none()
+            if user_info and user_info.profile_photo:
+                return "data:image/png;base64," + base64.b64encode(user_info.profile_photo).decode("utf-8")
+        return "/BlankProfile.png"
+
     def on_load(self):
         if not self.is_authenticated:
             return reflex_local_auth.LoginState.redir
-        print(self.authenticated_user_info)
+        # print(self.authenticated_user_info)
 
     def perform_logout(self):
         self.do_logout()
@@ -59,28 +66,28 @@ class SessionState(reflex_local_auth.LocalAuthState):
         return user_info if user_info else None
     
     async def handle_profile_photo_submit(self, files: list[rx.UploadFile]):
+        """Handles profile photo upload and stores it as binary data in the database."""
+
         if not files:
             return
+
         file = files[0]
-        upload_data = await file.read()
-        upload_dir = rx.get_upload_dir()
-        file_path = upload_dir / file.filename
-        
-        with file_path.open("wb") as buffer:
-            buffer.write(upload_data)
-        
+        image_data = await file.read()  # Read image as bytes
+
+        # Update database
         with rx.session() as session:
             userinfo = session.exec(
-                sqlmodel.select(UserInfo).where(UserInfo.user_id == self.my_userinfo_id)
+                sqlmodel.select(UserInfo).where(UserInfo.user_id == self.authenticated_user.id)
             ).one_or_none()
-            if userinfo is None:
-                return
-            userinfo.profile_photo = file.filename
-            session.add(userinfo)
-            session.commit()
-            session.refresh(userinfo)
-            self.authenticated_user_info = userinfo
-            print(f"Profile photo updated: {userinfo.profile_photo}")
+            if userinfo:
+                userinfo.profile_photo = image_data  # Store binary data
+                session.add(userinfo)
+                session.commit()
+                session.refresh(userinfo)
+                self.authenticated_user_info = userinfo  # Update state
+                print(f"Profile photo updated in DB")
+            else:
+                print(f"No UserInfo found for user_id: {self.my_userinfo_id}")
         
 class MyRegisterState(reflex_local_auth.RegistrationState):
     def handle_registration(
