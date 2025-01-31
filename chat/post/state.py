@@ -122,6 +122,58 @@ class PostState(SessionState):
             session.refresh(post)
             self.post = post  
 
+    def join_post(self, post_id: int):
+        with rx.session() as session:
+            post = session.exec(
+                select(PostModel).where(
+                    PostModel.id == post_id
+                )
+            ).one_or_none()
+            if post is None:
+                return
+            userinfo = session.exec(
+                select(UserInfo).where(
+                    UserInfo.user_id == self.my_userinfo_id
+                )
+            ).one_or_none()
+            if userinfo is None:
+                return
+            if userinfo not in post.members:
+                post.members.append(userinfo)
+                userinfo.joined_posts.append(post)
+                session.add(post)
+                session.add(userinfo)
+                session.commit()
+                session.refresh(post)
+                session.refresh(userinfo)
+            self.post = post
+
+    def leave_post(self, post_id: int):
+        with rx.session() as session:
+            post = session.exec(
+                select(PostModel).where(
+                    PostModel.id == post_id
+                )
+            ).one_or_none()
+            if post is None:
+                return
+            userinfo = session.exec(
+                select(UserInfo).where(
+                    UserInfo.user_id == self.my_userinfo_id
+                )
+            ).one_or_none()
+            if userinfo is None:
+                return
+            if userinfo in post.members:
+                post.members.remove(userinfo)
+                userinfo.joined_posts.remove(post)
+                session.add(post)
+                session.add(userinfo)
+                session.commit()
+                session.refresh(post)
+                session.refresh(userinfo)
+            self.post = post
+
 class addPostFormState(PostState):
     form_data: dict = {}
 
