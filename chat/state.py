@@ -1,11 +1,19 @@
 import os
 import reflex as rx
 from openai import OpenAI
+from dotenv import load_dotenv
 
+load_dotenv()
+
+"""
+Create a .env file in the root directory of the project and add the following:
+OPENAI_API_KEY="your_openai_api_key"
+"""
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Checking if the API key is set properly
-# if not os.getenv("OPENAI_API_KEY"):
-#     raise Exception("Please set OPENAI_API_KEY environment variable.")
+if not os.getenv("OPENAI_API_KEY"):
+    raise Exception("Please set OPENAI_API_KEY environment variable.")
 
 
 class QA(rx.Base):
@@ -100,9 +108,33 @@ class State(rx.State):
         messages = [
             {
                 "role": "system",
-                "content": "You are a friendly chatbot named Reflex. Respond in markdown.",
+                "content": """
+                You are Reconnect, an AI-powered assistant dedicated to crisis response and coordination.
+                Your primary goal is to assist individuals, emergency responders, and communities in finding
+                missing persons and lost items during and after crises. You provide structured, empathetic, 
+                and actionable responses based on AI-driven image recognition, geolocation tracking, and
+                real-time collaboration tools. 
+
+                When responding:
+                - Maintain a **calm, professional, and supportive** tone.
+                - Prioritize **accuracy, clarity, and actionable insights** in searches.
+                - Guide users on **best practices for submitting missing person reports**, including detailed
+                descriptions, last-known locations, and any supporting images.
+                - Encourage **community collaboration**, helping users engage with volunteers, emergency 
+                responders, and local resources.
+                - Suggest relevant **government agencies, humanitarian organizations, and resources** when applicable.
+                - Handle **sensitive cases with empathy**, ensuring the privacy and emotional well-being of users.
+
+                If a user is looking for a missing person or lost item, assist by:
+                1. Asking for key details (e.g., full name, age, distinguishing features, last seen location).
+                2. Searching through existing reports and AI-powered image recognition for potential matches.
+                3. Providing updates or directing them to official channels for further assistance.
+                
+                In moments of crisis, act as a **guiding companion**—offering hope, information, and structured steps
+                to help users reconnect with their loved ones and belongings.""",
             }
         ]
+        
         for qa in self.chats[self.current_chat]:
             messages.append({"role": "user", "content": qa.question})
             messages.append({"role": "assistant", "content": qa.answer})

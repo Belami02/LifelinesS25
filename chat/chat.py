@@ -19,6 +19,8 @@ from chat.post.post import post_page
 from chat.post.state import PostState
 from chat.pages.settings import SettingsPage
 
+
+
 def ChatPage() -> rx.Component:
     """The main app."""
     return rc.vstack(
