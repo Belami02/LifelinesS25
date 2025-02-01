@@ -4,6 +4,7 @@ from chat.auth.models import PostModel
 from chat.post.state import PostState
 from . import state
 from chat.components.mainNavbar import mainNavbar
+from chat.pages.map import map
 
 def post_detail_link(child: rx.Component, post: PostModel):
     if post is None:
@@ -26,13 +27,21 @@ def button_link(text: str, url: str, size: str, color_scheme: str) -> rx.Compone
 def post_item(post: PostModel):
     return rx.card(
         rx.vstack(
-            post_detail_link(
-                rx.heading(post.title, size="4"),  # Changed size to a valid value
-                post
+            rx.link(
+                rx.heading(post.title, size="4"),
+                on_click=PostState.set_current_post(post.id),
+                href=f"/post/{post.id}"
             ),
             rx.text(f"by {post.userinfo.user.username}", font_size="sm", color="gray.500"),
             rx.text(post.content[:100] + "...", white_space='pre-wrap', font_size="sm"),
-            button_link("Read More", url=f"/post/{post.id}", size="2", color_scheme="teal"),
+            # button_link("Read More", url=f"/post/{post.id}", size="2", color_scheme="teal"),
+            # rx.button("Read More", size="2", color_scheme="teal", on_click=lambda: rx.redirect(f"/post/{post.id}")),
+            rx.button(
+                "Read More",
+                size="2",
+                color_scheme="teal",
+                on_click=PostState.set_current_post(post.id),
+            ),
             spacing="3",
             align="start"
         ),

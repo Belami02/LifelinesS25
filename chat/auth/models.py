@@ -49,6 +49,13 @@ class UserInfo(rx.Model, table=True):
         nullable=False
     )
 
+class ImageModel(rx.Model, table=True):
+    """ Model for storing images related to posts. """
+    id: Optional[int] = Field(default=None, primary_key=True)
+    post_id: int = Field(foreign_key="postmodel.id")
+    image_data: bytes
+    post: Optional['PostModel'] = Relationship(back_populates="images")
+
 class PostModel(rx.Model, table=True):
     """ Model for posts about missing/found people, pets or items. """
     userinfo_id: int = Field(default=None, foreign_key="userinfo.id")
@@ -60,6 +67,7 @@ class PostModel(rx.Model, table=True):
         back_populates='joined_posts',
         sa_relationship_kwargs={"secondary": post_members}
     )
+    images: List['ImageModel'] = Relationship(back_populates="post")
     created_at: datetime = Field(
         default_factory=my_time,
         sa_type=sqlalchemy.DateTime(timezone=True),

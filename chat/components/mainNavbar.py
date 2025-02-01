@@ -143,6 +143,7 @@ def mobile_navbar() -> rx.Component:
                     rx.menu.separator(),
                     rx.menu.item("Log in", on_click=rx.redirect("/login")),
                     rx.menu.item("Register", on_click=rx.redirect("/register")),
+                    rx.menu.item("Log out", on_click=rx.redirect("/logout")),
                 ),
                 justify="end",
             ),

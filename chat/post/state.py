@@ -3,15 +3,25 @@ from typing import Optional, List
 import reflex as rx 
 from datetime import datetime, timezone
 from chat.auth.state import SessionState
-from chat.auth.models import PostModel, UserInfo
+from chat.auth.models import PostModel, ImageModel, UserInfo
 import sqlalchemy
 from sqlmodel import select
+from chat.pages.map import map
+import base64
 
 class PostState(SessionState):
     posts: List['PostModel'] = []
     post: Optional['PostModel'] = None
     post_content: str = ""
     post_publish_active: bool = False
+    current_post_id: Optional[int] = None
+    post_images: List[ImageModel] = []
+    loading_images: bool = False
+
+    def set_current_post(self, post_id: int):
+        """Set the current post and navigate to it."""
+        self.current_post_id = post_id
+        return rx.redirect(f"/post/{post_id}")
 
     @rx.var
     def state_post_id(self):
@@ -52,6 +62,71 @@ class PostState(SessionState):
             print(f"Error checking membership: {e}")
             return False
     
+    def post_info(self, post_id: int) -> Optional[PostModel]:
+        """Retrieve the post information by post_id."""
+        with rx.session() as session:
+            return session.exec(
+                select(PostModel).where(PostModel.id == post_id)
+            ).one_or_none()
+
+    def load_post_images(self, post_id: int):
+        """Load all images associated with the post with proper error handling."""
+        try:
+            self.loading_images = True
+            with rx.session() as session:
+                # Use joinedload to prevent N+1 queries
+                query = (
+                    select(ImageModel)
+                    .options(
+                        sqlalchemy.orm.joinedload(ImageModel.post)
+                    )
+                    .where(ImageModel.post_id == post_id)
+                    .order_by(ImageModel.id.desc())  # Latest images first
+                )
+                self.post_images = session.exec(query).all()
+        except Exception as e:
+            print(f"Error loading images: {e}")
+            self.post_images = []
+        finally:
+            self.loading_images = False
+
+    async def handle_post_images_submit(self, post_id: int, files: list[rx.UploadFile]):
+        """Handle image upload with proper error handling and size validation."""
+        if not files:
+            return rx.window_alert("Please select at least one image.")
+
+        try:
+            # Read image data with size validation
+            image_data_list = []
+            for file in files:
+                # Read the file content
+                image_data = await file.read()
+                
+                # Check file size (e.g., 5MB limit)
+                if len(image_data) > 5 * 1024 * 1024:  # 5MB in bytes
+                    return rx.window_alert(f"File {file.filename} is too large. Maximum size is 5MB.")
+                
+                image_data_list.append(image_data)
+
+            # Update the database
+            with rx.session() as session:
+                for image_data in image_data_list:
+                    image = ImageModel(post_id=post_id, image_data=image_data)
+                    session.add(image)
+                session.commit()
+
+            # Reload images after successful upload
+            self.load_post_images(post_id)
+            return rx.window_alert("Images uploaded successfully!")
+
+        except Exception as e:
+            print(f"Error uploading images: {e}")
+            return rx.window_alert("Error uploading images. Please try again.")
+
+    def image_base64(self, image_data: bytes) -> str:
+        """Convert binary image data to a base64 string for display."""
+        return "data:image/png;base64," + base64.b64encode(image_data).decode("utf-8")
+
     def load_posts(self, *args, **kwargs):
         with rx.session() as session:
             result = session.exec(
@@ -113,14 +188,19 @@ class PostState(SessionState):
                         PostModel.id == post_id
                     )
                 ).one_or_none()
+
+                print("Hm?")
                 if post is None:
                     print(f"Post {post_id} not found.")
                     return rx.redirect("/post")
                 
+                print("joined_posts?")
                 # Remove all associations
                 for member in post.members:
-                    member.joined_posts = [p for p in member.joined_posts if p.id != post_id]
+                    member.joined_posts = [p for p in member.joined_posts.copy() if p.id != post_id]
                     session.add(member)
+
+                print("What?")
                 
                 session.delete(post)
                 session.commit()
@@ -129,6 +209,55 @@ class PostState(SessionState):
         except Exception as e:
             print(f"Error removing post: {e}")
             return rx.redirect("/post")
+        
+    def delete_post(self, post_id: int):
+        """Delete the post and all its associated data from the database."""
+        try:
+            with rx.session() as session:
+                post = session.exec(
+                    select(PostModel)
+                    .options(
+                        sqlalchemy.orm.joinedload(PostModel.members)
+                        .joinedload(UserInfo.joined_posts)
+                    )
+                    .where(PostModel.id == post_id)
+                ).unique().one_or_none()
+
+                if post is None:
+                    print(f"Post {post_id} not found.")
+                    return rx.redirect("/post")
+                
+                member_ids = [member.user_id for member in post.members]
+                print(f"Removing post {post_id} with members: {member_ids}")
+                
+                affected_users = post.members.copy()
+                
+                post.members = []
+                session.add(post)
+                
+                for user in affected_users:
+                    fresh_user = session.exec(
+                        select(UserInfo)
+                        .options(sqlalchemy.orm.joinedload(UserInfo.joined_posts))
+                        .where(UserInfo.id == user.id)
+                    ).unique().one_or_none()
+                    
+                    if fresh_user:
+                        fresh_user.joined_posts = [p for p in fresh_user.joined_posts if p.id != post_id]
+                        session.add(fresh_user)
+                
+                session.commit()
+                
+                session.delete(post)
+                session.commit()
+                
+                print(f"Post {post_id} and all its associated data have been removed successfully")
+                return rx.redirect("/post")
+                
+        except Exception as e:
+            print(f"Error removing post: {e}")
+            session.rollback()
+            return rx.redirect(f"/post/{post_id}")
 
     def to_post(self, edit_page=False):
         if not self.post:

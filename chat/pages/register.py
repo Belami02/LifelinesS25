@@ -138,7 +138,7 @@ def RegistrationPage():
                     max_width="28em",
                     width="100%",
                 ),
-            ),
+            )
         ),
         #flex="1",  
         #width="100%",
