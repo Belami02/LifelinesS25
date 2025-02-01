@@ -369,10 +369,10 @@ def sample_community_gallery() -> rx.Component:
     """Generate a grid of sample community images."""
     # Sample data - replace with actual image data from your backend
     sample_images = [
-        {"url": "/MaxDog.png", "title": "Max Dog"},
+        {"url": "/MissingSon.png", "title": "Find Omar"},
         {"url": "/yilmaz_family.png", "title": "Missing Father"},
         {"url": "/Sarah.png", "title": "Sarah"},
-        {"url": "/iphone13.png", "title": "iPhone 13 Black"},
+        {"url": "/MaxDog.png", "title": "Max Dog"},
     ]
     
     return rx.card(

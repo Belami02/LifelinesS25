@@ -105,6 +105,27 @@ We have achieved the following milestones in our project:
 - Drafted a private chat interface showcasing chat with AI integration (currently not fully functional).
 - Ensured the platform is mobile responsive.
 
+## Demo (MVP)
+
+You can check the 4-minute demo of the current functionality at the following URL: [Watch the demo](https://www.youtube.com/watch?v=yAy-UUYEOLA)
+
+# Tech Side (Final)
+
+From MVP through Final we added following functionalities:
+
+- Added database models for communities, image uploads, and details.
+- Introduced a settings page to update user details, including profile images.
+- Created communities under posts:
+  - Users can now join, leave, add, and remove communities.
+  - Community membership is visible to all users.
+  - Integrated maps and image galleries within each post.
+- Enhanced the private chat interface with fully functional AI integration.
+- Currently working on updating the image gallery and map pins from the database.
+
+# Demo (Final)
+
+You can check the 1-minute demo of the current functionality at the following URL: [Watch the demo](https://youtu.be/rmGD_IhsRmc)
+
 ## Existing Pages:
 
 - `/`: Home page
@@ -117,10 +138,7 @@ We have achieved the following milestones in our project:
 - `/post/add`: Page to add a new post
 - `/post/[post_id]`: Detailed view of a specific post
 - `/post/[post_id]/edit`: Page to edit a specific post
-
-## Demo (MVP)
-
-You can check the 4-minute demo of the current functionality at the following URL: [Watch the demo](https://www.youtube.com/watch?v=yAy-UUYEOLA)
+- `/settings`: User settings page for updating profile picture
 
 ## Credit
 
