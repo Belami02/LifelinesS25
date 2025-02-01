@@ -122,7 +122,7 @@ From MVP through Final we added following functionalities:
 - Enhanced the private chat interface with fully functional AI integration.
 - Currently working on updating the image gallery and map pins from the database.
 
-# Demo (Final)
+## Demo (Final)
 
 You can check the 1-minute demo of the current functionality at the following URL: [Watch the demo](https://youtu.be/rmGD_IhsRmc)
 
