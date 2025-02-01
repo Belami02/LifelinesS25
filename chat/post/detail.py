@@ -278,7 +278,7 @@ def members_sidebar() -> rx.Component:
             bg=rx.color("accent", 3),
             align="start",
             height="650px",
-            width="20em",
+            width="22em",
         )
     )
 
@@ -343,7 +343,7 @@ def community_gallery() -> rx.Component:
             margin_left="1em",
             padding="6",
             height="620px",  # Match the height of members_sidebar
-            width="24em",    # Appropriate width for 2-column grid
+            width="25em",    # Appropriate width for 2-column grid
             overflow_y="auto",  # Enable scrolling for many images
             align_items='center'
         ),
