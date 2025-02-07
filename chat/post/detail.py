@@ -86,6 +86,7 @@ def data_list() -> rx.Component:
 		)
 
 def photo_upload():
+    # post_id = PostState.post.id
     return rx.card(
         rx.vstack(
             rx.heading(
@@ -122,14 +123,14 @@ def photo_upload():
                         )
                     ),
                 ),
-                id="upload1",
+                id="upload2",
                 border=f"1px dotted {colors['primary']}",
                 padding="1em",
                 margin_bottom="4",
             ),
             rx.hstack(
                 rx.foreach(
-                    rx.selected_files("upload1"),
+                    rx.selected_files("upload2"),
                     lambda file: rx.text(
                         file,
                         color=rx.color_mode_cond(
@@ -142,8 +143,8 @@ def photo_upload():
             rx.hstack(
                 rx.button(
                     "Upload",
-                    on_click=SessionState.handle_profile_photo_submit(
-                        rx.upload_files(upload_id="upload1")
+                    on_click=lambda: PostState.handle_post_images_submit(
+                        rx.upload_files(upload_id="upload2")
                     ),
                     
                     margin_top="1",
@@ -153,7 +154,7 @@ def photo_upload():
                 ),
                 rx.button(
                     "Clear",
-                    on_click=rx.clear_selected_files("upload1"),
+                    on_click=rx.clear_selected_files("upload2"),
                     margin_top="1",
                     variant="outline",
                     border_color=colors["primary"],

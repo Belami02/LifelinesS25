@@ -1,7 +1,7 @@
 import reflex as rx
 import reflex_local_auth
 from .models import UserInfo
-from chat.auth.models import PostModel, UserInfo
+from chat.auth.models import PostModel, UserInfo, ImageModel
 import sqlalchemy
 from sqlmodel import select
 from typing import Optional
@@ -90,32 +90,6 @@ class SessionState(reflex_local_auth.LocalAuthState):
                 print(f"Profile photo updated in DB")
             else:
                 print(f"No UserInfo found for user_id: {self.my_userinfo_id}")
-
-    async def handle_post_images_submit(self, post_id: int, files: list[rx.UploadFile]):
-        """Handles image upload for a post and stores images as binary data in the database."""
-
-        if not files:
-            return
-
-        # Read image data
-        image_data_list = []
-        for file in files:
-            image_data = await file.read()  # Read each image as bytes
-            image_data_list.append(image_data)
-
-        # Update the database
-        with rx.session() as session:
-            post = session.exec(
-                sqlmodel.select(PostModel).where(PostModel.id == post_id)
-            ).one_or_none()
-            if post:
-                post.images.extend(image_data_list)  # Store images in the post
-                session.add(post)
-                session.commit()
-                session.refresh(post)
-                print(f"Images updated for Post {post_id}")
-            else:
-                print(f"No Post found with id: {post_id}")
 
     def join_post(self, post_id: int):
         """Add current user to post members."""

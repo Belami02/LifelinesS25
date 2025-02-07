@@ -90,38 +90,58 @@ class PostState(SessionState):
         finally:
             self.loading_images = False
 
-    async def handle_post_images_submit(self, post_id: int, files: list[rx.UploadFile]):
-        """Handle image upload with proper error handling and size validation."""
-        if not files:
-            return rx.window_alert("Please select at least one image.")
+    def load_all_images(self):
+        """Load all images from the database with proper error handling."""
+        try:
+            self.loading_images = True
+            with rx.session() as session:
+                # Direct query to get all images with their binary data
+                query = (
+                    select(ImageModel)
+                    .options(
+                        sqlalchemy.orm.joinedload(ImageModel.post)  # Join with post to get post details
+                    )
+                    .order_by(ImageModel.id.desc())  # Latest images first
+                )
+                self.post_images = session.exec(query).all()  # Get all images as ImageModel objects
+                
+                print(f"Loaded {len(self.post_images)} images from database")
+                
+        except Exception as e:
+            print(f"Error loading images: {e}")
+            self.post_images = []
+        finally:
+            self.loading_images = False
+
+    async def handle_post_images_submit(self, files: list[rx.UploadFile]):
+        """Handles image upload for a post and stores images as binary data in the database."""
+        if not files or not self.post:
+            return
 
         try:
-            # Read image data with size validation
+            # Read image data
             image_data_list = []
             for file in files:
-                # Read the file content
-                image_data = await file.read()
-                
-                # Check file size (e.g., 5MB limit)
-                if len(image_data) > 5 * 1024 * 1024:  # 5MB in bytes
-                    return rx.window_alert(f"File {file.filename} is too large. Maximum size is 5MB.")
-                
+                image_data = await file.read()  # Read each image as bytes
                 image_data_list.append(image_data)
 
             # Update the database
             with rx.session() as session:
+                # Create ImageModel instances for each image
                 for image_data in image_data_list:
-                    image = ImageModel(post_id=post_id, image_data=image_data)
+                    image = ImageModel(
+                        post_id=self.post.id,
+                        image_data=image_data
+                    )
                     session.add(image)
+                
                 session.commit()
-
-            # Reload images after successful upload
-            self.load_post_images(post_id)
-            return rx.window_alert("Images uploaded successfully!")
-
+                print(f"Images updated for Post {self.post.id}")
+                
+                # Refresh post images
+                self.load_post_images(self.post.id)
         except Exception as e:
             print(f"Error uploading images: {e}")
-            return rx.window_alert("Error uploading images. Please try again.")
 
     def image_base64(self, image_data: bytes) -> str:
         """Convert binary image data to a base64 string for display."""

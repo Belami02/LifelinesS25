@@ -19,7 +19,7 @@ from chat.post.post import post_page
 from chat.post.state import PostState
 from chat.pages.settings import SettingsPage
 
-
+from chat.pages.images import ImagesPage
 
 def ChatPage() -> rx.Component:
     """The main app."""
@@ -86,4 +86,12 @@ app.add_page(
     route="/settings",
     title="Settings",
     on_load=SessionState.on_load
+)
+
+# ''' FOR TESTING PURPOSES'''
+app.add_page(
+    ImagesPage, 
+    route="/images",
+    on_load=PostState.load_all_images,
+    title="All Images",
 )
